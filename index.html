@@ -4,14 +4,10 @@
     <meta charset="utf-8" />
     <title>AeroATL Greenway Plan</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
     <script src="./lib/nice-select2-2.0.0/dist/js/nice-select2.js"></script>
     <link rel="stylesheet" href="./lib/nice-select2-2.0.0/dist/css/nice-select2.css"/>
-    <link
-      href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css"
-      rel="stylesheet"
-    />
-
     <style>
       body {
         margin: 0;
@@ -87,6 +83,8 @@
   </head>
 
   <body>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css">
     <div id="map"></div>
     <p style="font-style: italic; position: absolute; left: 100px; bottom: 25px; font-size: 12px">Map by Xiaofan Liang, Georgia Tech</p> 
     <div id="console">
@@ -245,7 +243,18 @@
               //popup.remove();
             });
           });
-        })
+      });
+
+      map.addControl(
+        new MapboxDirections({
+          accessToken: mapboxgl.accessToken,
+          controls: {
+            instructions: false
+          }
+        }),
+        'top-left'
+      );
+
     </script>
   </body>
 </html>
