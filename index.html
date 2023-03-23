@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AeroATL Greenway Plan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
+    <script src="./lib/nice-select2-2.0.0/dist/js/nice-select2.js"></script>
+    <link rel="stylesheet" href="./lib/nice-select2-2.0.0/dist/css/nice-select2.css"/>
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      h2 {
+        font-size: 16px;
+        line-height: 20px;
+        margin-bottom: 10px;
+      }
+
+      a {
+        text-decoration: none;
+        color: #FFB24A 
+;
+      }
+
+      #console {
+        position: absolute;
+        margin: 10px;
+        width: 260px;
+        background-color: white;
+        padding: 10px;
+        right: 0px;
+      }
+
+      .session {
+        margin-bottom: 20px;
+      }
+
+      .session2 {
+        margin-bottom: 10px;
+      }
+
+      #legend div span {
+        border-radius: 50%;
+        display: inline-block;
+        height: 10px;
+        margin-right: 5px;
+        width: 10px;
+      }
+
+      .label {
+        width: 15%;
+        display: inline-block;
+        text-align: left;
+      }
+
+      .mapboxgl-popup-content {
+        padding: 10px;
+        line-height: 1.5;
+        max-width: 1000px;
+      }
+
+      .mapboxgl-popup-tip {
+        display: none;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+    <p style="font-style: italic; position: absolute; left: 100px; bottom: 25px; font-size: 12px">Map by Xiaofan Liang, Georgia Tech</p> 
+    <div id="console">
+      <h1>AeroATL Greenway Plan</h1>
+      <p>
+        Explore how your trips may be impacted by AeroATL Greenway Plan! 
+        <a
+          href="https://aeroatl.org/special-projects/aeroatl-greenway-model-mile/"
+          >Learn more about this project here.</a
+        > 
+      </p>
+      <div id="legend", class="session">
+        <h2>AeroATL Greenway Plan Segment by Color</h2>
+        <div><span style="background-color: #000101"></span>Model Miles</div>
+        <div><span style="background-color: #181B18"></span>Priority Network</div>
+        <div><span style="background-color: #424146"></span>Loop Connecting Downtowns</div>
+        <div><span style="background-color: #61676C"></span>Airport Loop</div>
+        <div><span style="background-color: #818285"></span>Outer Ring</div>
+        <div><span style="background-color: #B4B1AF"></span>Local Connections</div>
+        <h2>Building Types by Color</h2>
+        <div><span style="background-color: #5B5558"></span>Airport</div>
+        <div><span style="background-color: #9B959D"></span>Infrastructure</div>
+        <div><span style="background-color: #890B24"></span>Residence</div>
+        <div><span style="background-color: #CB4700"></span>Commerce</div>
+        <div><span style="background-color: #FE9C2D"></span>Hotel</div>
+        <div><span style="background-color: #0E7C33"></span>Recreation</div>
+        <div><span style="background-color: #3C9493"></span>Industry</div>
+        <div><span style="background-color: #072C83"></span>Office</div>
+        <div><span style="background-color: #2F6BA7"></span>Institution</div>
+        <div><span style="background-color: #6DA8D6"></span>School</div>
+      </div>
+      <!-- <div class="session2">
+        <h2>Filter by frequency (<=) <label id="active-freq">24333</label></h2> 
+        <input
+        id="slider"
+        class="row"
+        type="range"
+        min="0"
+        max="4.387"
+        step="0.001"
+        value="4.387"
+        style="width: 100%; margin: 0;"
+        />
+        </div>
+      <div class="session2">
+        <h2>Filter by chain restaurant name</h2>
+      </div>
+      <div class="session" id="filter"> 
+      </div> -->
+    </div>
+    <script>
+      //reference: https://docs.mapbox.com/help/tutorials/show-changes-over-time/
+      //https://docs.mapbox.com/mapbox-gl-js/example/filter-features-within-map-view/
+      //https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/
+      //https://docs.mapbox.com/mapbox-gl-js/example/popup/
+
+      mapboxgl.accessToken = 'pk.eyJ1IjoieHhmZmxsIiwiYSI6ImNsZmtoY3YzbDAwdng0NG1yOXVqYmFveW4ifQ._VjRhEILbOSWgFVR8dtmSw';
+      var map = new mapboxgl.Map({
+          container: 'map', // container ID
+          style: 'mapbox://styles/mapbox/light-v10', // style URL //dark-v10
+          center: [-84.4, 33.64], // starting position [lng, lat]
+          zoom: 11.5 // starting zoom
+      });
+
+      // Create a popup, but don't add it to the map yet.
+      const popup = new mapboxgl.Popup({
+        closeButton: true
+      });
+
+      map.on('load', () => {
+
+        Promise.all([
+          fetch('data/Building_mapbox.geojson').then(response => response.json()),
+          fetch('data/AeroATL_mapbox.geojson').then(response => response.json())
+        ])
+        .then(([buildingData, greenwayData]) => {
+
+            map.addSource('building', {
+              type: 'geojson',
+              data: buildingData
+            });
+
+            map.addSource('greenway', {
+              type: 'geojson',
+              data: greenwayData
+            });
+
+            map.addLayer({
+              id: 'building-layer',
+              type: 'fill',
+              source: 'building',
+              paint: {
+                'fill-opacity': 0.3,
+                'fill-color': [
+                  'match',
+                  ['get', 'LU4Vis'],
+                  'Airport', '#5B5558',
+                  'Infrastructure', '#9B959D',
+                  'Commerce', '#CB4700',
+                  'Hotel', '#FE9C2D',
+                  'Recreation', '#0E7C33',
+                  'Office', '#072C83',
+                  'Institution', '#2F6BA7',
+                  'School', '#6DA8D6',
+                  'Residence', '#890B24',
+                  'Industry', '#3C9493',
+                  '#F9F8F8'
+                  ]
+              }
+            });
+
+            map.addLayer({
+              id: 'greenway-layer',
+              type: 'line',
+              source: 'greenway',
+              paint: {
+                'line-width': 3,
+                'line-opacity': 0.8,
+                'line-color': [
+                  'match',
+                  ['get', 'AeroATL'],
+                  'Model Miles', '#000101',
+                  'Priority Network', '#181B18',
+                  'Loop Connecting Downtowns', '#424146',
+                  'Airport Loop', '#61676C',
+                  'Outer Ring', '#818285',
+                  'Local Connections', '#B4B1AF',
+                  '#F9F8F8'
+                  ]
+              }
+            });
+
+            map.on('click', 'building-layer', (e) => { //mousemove
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer'; 
+            // Populate the popup and set its coordinates based on the feature.
+            const feature = e.features[0];
+            popup
+              .setLngLat(e.lngLat)
+              .setHTML(
+              `<p style='margin:0'><b>Zoning Code:</b> ${feature.properties.Zn_ClsC}</p>
+               <p style='margin:0'><b>Land Use Code:</b> ${feature.properties.LUCode}</p>
+               <p style='margin:0'><b>Land Use Type:</b> ${feature.properties.LUDes}</p>
+               <p style='margin:0'><b>Land Use Vis:</b> ${feature.properties.LU4Viz}</p>
+               <p style='margin:0'><b>Estimated Jobs:</b> ${feature.properties.BldgJobs}</p>
+               <p style='margin:0'><b>Est. Jobs $3333+:</b> ${feature.properties.Jobs3333}</p>`
+              )
+              .addTo(map);
+
+            //const popupElem = popup.getElement();
+            //popupElem.style.border = `2px solid ${feature.properties.f > 50 ? '#800526':'#FFB24A'}`;
+            });
+               
+            map.on('mouseleave', 'building-layer', () => {
+              map.getCanvas().style.cursor = '';
+              //popup.remove();
+            });
+          });
+        })
+    </script>
+  </body>
+</html>
