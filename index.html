@@ -72,7 +72,7 @@
       .mapboxgl-popup-content {
         padding: 10px;
         line-height: 1.5;
-        max-width: 1000px;
+        max-width: 2000px;
       }
 
       .mapboxgl-popup-tip {
@@ -96,14 +96,27 @@
           >Learn more about this project here.</a
         > 
       </p>
+      <div class="session">
+        <h2>Show AeroATL Greenway Plan Layer(s)</h2> 
+        <select id="selectLayer">
+          <option selected="selected">All</option>
+          <option>Existing Bike Paths</option>
+          <option>Model Miles</option>
+          <option>Priority Network</option>
+          <option>Loop Connecting Downtowns</option>
+          <option>Airport Loop</option>
+          <option>Outer Ring</option>
+          <option>Local Connections</option>
+        </select>
+      </div>
       <div id="legend", class="session">
-        <h2>AeroATL Greenway Plan Segment by Color</h2>
+<!--         <h2>AeroATL Greenway Plan Segment by Color</h2>
         <div><span style="background-color: #000101"></span>Model Miles</div>
         <div><span style="background-color: #181B18"></span>Priority Network</div>
         <div><span style="background-color: #424146"></span>Loop Connecting Downtowns</div>
         <div><span style="background-color: #61676C"></span>Airport Loop</div>
         <div><span style="background-color: #818285"></span>Outer Ring</div>
-        <div><span style="background-color: #B4B1AF"></span>Local Connections</div>
+        <div><span style="background-color: #B4B1AF"></span>Local Connections</div> -->
         <h2>Building Types by Color</h2>
         <div><span style="background-color: #5B5558"></span>Airport</div>
         <div><span style="background-color: #9B959D"></span>Infrastructure</div>
@@ -116,30 +129,13 @@
         <div><span style="background-color: #2F6BA7"></span>Institution</div>
         <div><span style="background-color: #6DA8D6"></span>School</div>
       </div>
-      <!-- <div class="session2">
-        <h2>Filter by frequency (<=) <label id="active-freq">24333</label></h2> 
-        <input
-        id="slider"
-        class="row"
-        type="range"
-        min="0"
-        max="4.387"
-        step="0.001"
-        value="4.387"
-        style="width: 100%; margin: 0;"
-        />
-        </div>
-      <div class="session2">
-        <h2>Filter by chain restaurant name</h2>
-      </div>
-      <div class="session" id="filter"> 
-      </div> -->
     </div>
     <script>
       //reference: https://docs.mapbox.com/help/tutorials/show-changes-over-time/
       //https://docs.mapbox.com/mapbox-gl-js/example/filter-features-within-map-view/
       //https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/
       //https://docs.mapbox.com/mapbox-gl-js/example/popup/
+      //https://codepen.io/ZondaDesign/pen/xxVxZVR //toggle layer
 
       mapboxgl.accessToken = 'pk.eyJ1IjoieHhmZmxsIiwiYSI6ImNsZmtoY3YzbDAwdng0NG1yOXVqYmFveW4ifQ._VjRhEILbOSWgFVR8dtmSw';
       var map = new mapboxgl.Map({
@@ -158,10 +154,10 @@
 
         Promise.all([
           fetch('data/Building_mapbox.geojson').then(response => response.json()),
-          fetch('data/AeroATL_mapbox.geojson').then(response => response.json())
+          fetch('data/Greenway_mapbox.geojson').then(response => response.json())
         ])
         .then(([buildingData, greenwayData]) => {
-
+            //console.log(greenwayData.features[535].properties)
             map.addSource('building', {
               type: 'geojson',
               data: buildingData
@@ -201,28 +197,30 @@
               type: 'line',
               source: 'greenway',
               paint: {
-                'line-width': 3,
+                'line-width': 2,
                 'line-opacity': 0.8,
-                'line-color': [
-                  'match',
-                  ['get', 'AeroATL'],
-                  'Model Miles', '#000101',
-                  'Priority Network', '#181B18',
-                  'Loop Connecting Downtowns', '#424146',
-                  'Airport Loop', '#61676C',
-                  'Outer Ring', '#818285',
-                  'Local Connections', '#B4B1AF',
-                  '#F9F8F8'
-                  ]
+                'line-color': '#000101'
+                // [
+                //   'match',
+                //   ['get', 'AeroATL'],
+                //   'Model Miles', '#000101',
+                //   'Priority Network', '#181B18',
+                //   'Loop Connecting Downtowns', '#424146',
+                //   'Airport Loop', '#61676C',
+                //   'Outer Ring', '#818285',
+                //   'Local Connections', '#B4B1AF',
+                //   '#F9F8F8'
+                // ]
               }
             });
 
-            map.on('click', 'building-layer', (e) => { //mousemove
+            map.on('mouseenter', 'building-layer', (e) => { //mousemove
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer'; 
             // Populate the popup and set its coordinates based on the feature.
             const feature = e.features[0];
             popup
+              //.setLngLat(e.lngLat) //for click
               .setLngLat(e.lngLat)
               .setHTML(
               `<p style='margin:0'><b>Zoning Code:</b> ${feature.properties.Zn_ClsC}</p>
@@ -240,14 +238,31 @@
                
             map.on('mouseleave', 'building-layer', () => {
               map.getCanvas().style.cursor = '';
-              //popup.remove();
+              popup.remove();
             });
+
+            document
+              .getElementById('selectLayer')
+              .addEventListener('change', (event) => {
+                const GreenwayLayer = event.target.value;
+                console.log(GreenwayLayer)
+                // update the map filter
+                //map.setFilter('greenway-layer', ['==', 'AeroATL', GreenwayLayer])
+                if(GreenwayLayer == 'All') {
+                  map.setFilter('greenway-layer', ['!=', 'AeroATL', ''])
+                } else {
+                  map.setFilter('greenway-layer', ['==', 'AeroATL', GreenwayLayer]);
+                }
+                
+              });
           });
       });
 
+      //https://github.com/mapbox/mapbox-gl-directions/blob/master/API.md#mapboxdirections
       map.addControl(
         new MapboxDirections({
           accessToken: mapboxgl.accessToken,
+          profile: "mapbox/walking",
           controls: {
             instructions: false
           }
