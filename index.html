@@ -8,6 +8,8 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
     <script src="./lib/nice-select2-2.0.0/dist/js/nice-select2.js"></script>
     <link rel="stylesheet" href="./lib/nice-select2-2.0.0/dist/css/nice-select2.css"/>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css">
     <style>
       body {
         margin: 0;
@@ -56,11 +58,13 @@
       }
 
       #legend div span {
-        border-radius: 50%;
+/*        border-radius: 50%;*/
         display: inline-block;
-        height: 10px;
+        height: 12px;
         margin-right: 5px;
-        width: 10px;
+        margin-left: 5px;
+        width: 12px;
+        opacity: 0.5;
       }
 
       .label {
@@ -79,44 +83,72 @@
         display: none;
       }
 
+      .mapboxgl-ctrl-directions {
+        min-width: 250px;
+        max-wdith: 250px;
+      }
+
+      .mapbox-directions-instructions {
+        display: none;
+      }
+
+      .mapbox-directions-component.mapbox-directions-route-summary {
+        background-color: white;
+        margin: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        padding-right: 0px;
+        line-height: 12px;
+      }
+
+      .mapbox-directions-component.mapbox-directions-route-summary h1, .mapbox-directions-component.mapbox-directions-route-summary span {
+        color: rgba(0,0,0,.75);
+        font-size: 13px;
+      }
+
     </style>
   </head>
 
   <body>
-    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
-    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css">
     <div id="map"></div>
     <p style="font-style: italic; position: absolute; left: 100px; bottom: 25px; font-size: 12px">Map by Xiaofan Liang, Georgia Tech</p> 
     <div id="console">
       <h1>AeroATL Greenway Plan</h1>
       <p>
-        Explore how your trips may be impacted by AeroATL Greenway Plan! 
+        Explore how your trips may be improved with AeroATL Greenway Plan! 
         <a
           href="https://aeroatl.org/special-projects/aeroatl-greenway-model-mile/"
           >Learn more about this project here.</a
         > 
       </p>
+      <div id = 'directions'>
+        <p>
+          Click on the map or type below to choose an origin and destination
+        </p>
+        <p style="font-size: 12px">
+          The visualized trip shows the suggested path by modes in the current road network (without the Greenway Plan). How much of this trip can be covered by the Greenway? Can you think of a better path that makes use of the Greenway? 
+        </p>
+      </div>
       <div class="session">
         <h2>Show AeroATL Greenway Plan Layer(s)</h2> 
-        <select id="selectLayer">
-          <option selected="selected">All</option>
-          <option>Existing Bike Paths</option>
-          <option>Model Miles</option>
-          <option>Priority Network</option>
-          <option>Loop Connecting Downtowns</option>
-          <option>Airport Loop</option>
-          <option>Outer Ring</option>
-          <option>Local Connections</option>
-        </select>
-      </div>
+        <div id="selectLayer">
+          <input type="checkbox" class="checkbox" checked='checked' value="All"> All
+          <br>
+          <input type="checkbox" class="checkbox" value="Existing Bike Paths"> Existing Bike Paths
+          <br>
+          <input type="checkbox" class="checkbox" value="Model Miles"> Model Miles
+          <br>
+          <input type="checkbox" class="checkbox" value="Priority Network"> Priority Network
+          <br>
+          <input type="checkbox" class="checkbox" value="Loop Connecting Downtowns"> Loop Connecting Downtowns
+          <br>
+          <input type="checkbox" class="checkbox" value="Airport Loop"> Airport Loop
+          <br>
+          <input type="checkbox" class="checkbox" value="Outer Ring"> Outer Ring
+          <br>
+          <input type="checkbox" class="checkbox" value="Local Connections"> Local Connections
+        </div>
       <div id="legend", class="session">
-<!--         <h2>AeroATL Greenway Plan Segment by Color</h2>
-        <div><span style="background-color: #000101"></span>Model Miles</div>
-        <div><span style="background-color: #181B18"></span>Priority Network</div>
-        <div><span style="background-color: #424146"></span>Loop Connecting Downtowns</div>
-        <div><span style="background-color: #61676C"></span>Airport Loop</div>
-        <div><span style="background-color: #818285"></span>Outer Ring</div>
-        <div><span style="background-color: #B4B1AF"></span>Local Connections</div> -->
         <h2>Building Types by Color</h2>
         <div><span style="background-color: #5B5558"></span>Airport</div>
         <div><span style="background-color: #9B959D"></span>Infrastructure</div>
@@ -126,8 +158,8 @@
         <div><span style="background-color: #0E7C33"></span>Recreation</div>
         <div><span style="background-color: #3C9493"></span>Industry</div>
         <div><span style="background-color: #072C83"></span>Office</div>
-        <div><span style="background-color: #2F6BA7"></span>Institution</div>
-        <div><span style="background-color: #6DA8D6"></span>School</div>
+        <div><span style="background-color: #6DA8D6"></span>Institution</div>
+        <div><span style="background-color: #532788"></span>School</div>
       </div>
     </div>
     <script>
@@ -150,6 +182,18 @@
         closeButton: true
       });
 
+      function getCheckedValues(className) {
+        // Get all checkboxes with the specified class name
+        const checkboxes = document.querySelectorAll(`.${className}`);
+
+        // Filter the checked checkboxes and map to their values
+        const checkedValues = Array.from(checkboxes)
+          .filter(checkbox => checkbox.checked)
+          .map(checkbox => checkbox.value);
+
+        return checkedValues;
+      }
+
       map.on('load', () => {
 
         Promise.all([
@@ -157,7 +201,6 @@
           fetch('data/Greenway_mapbox.geojson').then(response => response.json())
         ])
         .then(([buildingData, greenwayData]) => {
-            //console.log(greenwayData.features[535].properties)
             map.addSource('building', {
               type: 'geojson',
               data: buildingData
@@ -183,8 +226,8 @@
                   'Hotel', '#FE9C2D',
                   'Recreation', '#0E7C33',
                   'Office', '#072C83',
-                  'Institution', '#2F6BA7',
-                  'School', '#6DA8D6',
+                  'Institution', '#6DA8D6',
+                  'School', '#532788',
                   'Residence', '#890B24',
                   'Industry', '#3C9493',
                   '#F9F8F8'
@@ -200,17 +243,6 @@
                 'line-width': 2,
                 'line-opacity': 0.8,
                 'line-color': '#000101'
-                // [
-                //   'match',
-                //   ['get', 'AeroATL'],
-                //   'Model Miles', '#000101',
-                //   'Priority Network', '#181B18',
-                //   'Loop Connecting Downtowns', '#424146',
-                //   'Airport Loop', '#61676C',
-                //   'Outer Ring', '#818285',
-                //   'Local Connections', '#B4B1AF',
-                //   '#F9F8F8'
-                // ]
               }
             });
 
@@ -241,34 +273,94 @@
               popup.remove();
             });
 
+
+            // let allCheckBox = document.querySelectorAll('.checkbox')
+            // allCheckBox.forEach((checkbox, index) => {
+            //   checkbox.addEventListener('change', (event) => {
+            //     console.log(event.target.value)
+            //   })
+            // })
+
             document
-              .getElementById('selectLayer')
-              .addEventListener('change', (event) => {
-                const GreenwayLayer = event.target.value;
-                console.log(GreenwayLayer)
-                // update the map filter
-                //map.setFilter('greenway-layer', ['==', 'AeroATL', GreenwayLayer])
-                if(GreenwayLayer == 'All') {
-                  map.setFilter('greenway-layer', ['!=', 'AeroATL', ''])
-                } else {
-                  map.setFilter('greenway-layer', ['==', 'AeroATL', GreenwayLayer]);
-                }
-                
-              });
+            .getElementById('selectLayer')
+            .addEventListener('change', (event) => {
+                //console.log(event.target.value)
+                event.preventDefault();
+                event.stopPropagation();
+              const GreenwayLayer = event.target.value;
+              const checked = getCheckedValues('checkbox');
+              //console.log(checked)
+              // update the map filter
+              if(checked.includes('All')) {
+                map.setFilter('greenway-layer', ['!=', 'AeroATL', ''])
+                map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
+              } else if (checked.length == 0){
+                //console.log('Empty')
+                map.setLayoutProperty('greenway-layer', 'visibility', 'none')
+              } else {
+                //console.log('Multiple')
+                map.setFilter('greenway-layer', ['match', ['get', 'AeroATL'], checked, true, false])
+                map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
+              }
+            });
           });
       });
-
+      
+      // document.addEventListener('DOMContentLoaded', function(){
+      //   const checkboxes = document.querySelectorAll('.checkbox');
+      //   checkboxes.forEach((checkbox, index) => {
+      //     checkbox.addEventListener('click', function(e){
+      //     if(checkbox.checked){
+      //       e.stopPropagation();
+      //       e.preventDefault();
+      //       checkbox.checked=true;
+      //       console.log(`Checkbox ${index + 1} is checked`)
+      //     } else {
+      //       e.stopPropagation();
+      //       e.preventDefault();
+      //       checkbox.checked=false;
+      //       console.log(`Checkbox ${index + 1} is unchecked`)
+      //     }
+      //     });
+      //   });
+      // });
+      // map.on('idle', () => {
+      //   document
+      //     .getElementById('selectLayer')
+      //     .addEventListener('click', (e) => {
+      //       e.preventDefault();
+      //       e.stopPropagation();
+      //       console.log(e.target.value)
+      //     })
+      // });
+      
       //https://github.com/mapbox/mapbox-gl-directions/blob/master/API.md#mapboxdirections
-      map.addControl(
-        new MapboxDirections({
+      const plugin = new MapboxDirections({
           accessToken: mapboxgl.accessToken,
           profile: "mapbox/walking",
+
           controls: {
-            instructions: false
+            instructions: true
           }
-        }),
-        'top-left'
-      );
+      }); 
+      //map.addControl(plugin,'top-left');
+
+      //add direction plug in to an existing div 
+      document.getElementById('directions').appendChild(plugin.onAdd(map))
+
+      // plugin.on('update', () => {
+      //   console.log('hi')
+      //   const route = plugin.getRoute();
+      //   console.log(route)
+      //   if (route && route.length > 0) {
+      //     const distanceInMeters = route[0].distance;
+      //     console.log('Distance (meters):', distanceInMeters);
+      //   }
+      // })
+      // map.on('render', () => {
+      //   const route = plugin.getRoute();
+      //   console.log(route)
+      // })
 
     </script>
   </body>
