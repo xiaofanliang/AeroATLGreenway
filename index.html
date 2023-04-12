@@ -58,7 +58,6 @@
       }
 
       #legend div span {
-/*        border-radius: 50%;*/
         display: inline-block;
         height: 12px;
         margin-right: 5px;
@@ -263,23 +262,12 @@
                <p style='margin:0'><b>Est. Jobs $3333+:</b> ${feature.properties.Jobs3333}</p>`
               )
               .addTo(map);
-
-            //const popupElem = popup.getElement();
-            //popupElem.style.border = `2px solid ${feature.properties.f > 50 ? '#800526':'#FFB24A'}`;
             });
                
             map.on('mouseleave', 'building-layer', () => {
               map.getCanvas().style.cursor = '';
               popup.remove();
             });
-
-
-            // let allCheckBox = document.querySelectorAll('.checkbox')
-            // allCheckBox.forEach((checkbox, index) => {
-            //   checkbox.addEventListener('change', (event) => {
-            //     console.log(event.target.value)
-            //   })
-            // })
 
             document
             .getElementById('selectLayer')
@@ -305,34 +293,6 @@
             });
           });
       });
-      
-      // document.addEventListener('DOMContentLoaded', function(){
-      //   const checkboxes = document.querySelectorAll('.checkbox');
-      //   checkboxes.forEach((checkbox, index) => {
-      //     checkbox.addEventListener('click', function(e){
-      //     if(checkbox.checked){
-      //       e.stopPropagation();
-      //       e.preventDefault();
-      //       checkbox.checked=true;
-      //       console.log(`Checkbox ${index + 1} is checked`)
-      //     } else {
-      //       e.stopPropagation();
-      //       e.preventDefault();
-      //       checkbox.checked=false;
-      //       console.log(`Checkbox ${index + 1} is unchecked`)
-      //     }
-      //     });
-      //   });
-      // });
-      // map.on('idle', () => {
-      //   document
-      //     .getElementById('selectLayer')
-      //     .addEventListener('click', (e) => {
-      //       e.preventDefault();
-      //       e.stopPropagation();
-      //       console.log(e.target.value)
-      //     })
-      // });
       
       //https://github.com/mapbox/mapbox-gl-directions/blob/master/API.md#mapboxdirections
       const plugin = new MapboxDirections({
