@@ -269,27 +269,28 @@
               popup.remove();
             });
 
-            document
-            .getElementById('selectLayer')
-            .addEventListener('change', (event) => {
-                //console.log(event.target.value)
+            const checkboxes = document.querySelectorAll('#selectLayer input[type="checkbox"]');
+
+            checkboxes.forEach((checkbox) => {
+              checkbox.addEventListener('change', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
-              const GreenwayLayer = event.target.value;
-              const checked = getCheckedValues('checkbox');
-              //console.log(checked)
-              // update the map filter
-              if(checked.includes('All')) {
-                map.setFilter('greenway-layer', ['!=', 'AeroATL', ''])
-                map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
-              } else if (checked.length == 0){
-                //console.log('Empty')
-                map.setLayoutProperty('greenway-layer', 'visibility', 'none')
-              } else {
-                //console.log('Multiple')
-                map.setFilter('greenway-layer', ['match', ['get', 'AeroATL'], checked, true, false])
-                map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
-              }
+                const GreenwayLayer = event.target.value;
+                const checked = getCheckedValues('checkbox');
+                //console.log(checked)
+                // update the map filter
+                if(checked.includes('All')) {
+                  map.setFilter('greenway-layer', ['!=', 'AeroATL', ''])
+                  map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
+                } else if (checked.length == 0){
+                  //console.log('Empty')
+                  map.setLayoutProperty('greenway-layer', 'visibility', 'none')
+                } else {
+                  //console.log('Multiple')
+                  map.setFilter('greenway-layer', ['match', ['get', 'AeroATL'], checked, true, false])
+                  map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
+                }
+              }); 
             });
           });
       });
