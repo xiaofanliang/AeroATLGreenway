@@ -123,7 +123,7 @@
       </p>
       <div id = 'directions'>
         <p>
-          Click on the map or type below to choose an origin and destination
+          Double click on the map or type below to choose an origin and destination
         </p>
         <p style="font-size: 12px">
           The visualized trip shows the suggested path by modes in the current road network (without the Greenway Plan). How much of this trip can be covered by the Greenway? Can you think of a better path that makes use of the Greenway? 
@@ -338,7 +338,7 @@
       const plugin = new MapboxDirections({
           accessToken: mapboxgl.accessToken,
           profile: "mapbox/walking",
-
+          interactive: false,
           controls: {
             instructions: true
           }
@@ -348,19 +348,43 @@
       //add direction plug in to an existing div 
       document.getElementById('directions').appendChild(plugin.onAdd(map))
 
-      // plugin.on('update', () => {
-      //   console.log('hi')
-      //   const route = plugin.getRoute();
-      //   console.log(route)
-      //   if (route && route.length > 0) {
-      //     const distanceInMeters = route[0].distance;
-      //     console.log('Distance (meters):', distanceInMeters);
-      //   }
-      // })
-      // map.on('render', () => {
-      //   const route = plugin.getRoute();
-      //   console.log(route)
-      // })
+      let originSet = false;
+      let mouseDown = false;
+      let mouseMoved = false;
+
+      //setting mouseDown and moseMoved to prevent the issue where a click and drag followed by a single click trigger a double-click event. 
+      map.on('mousedown', () => {
+        mouseDown = true;
+        mouseMoved = false;
+      });
+
+      map.on('mousemove', () => {
+        if (mouseDown) {
+          mouseMoved = true;
+        }
+      });
+
+      map.on('mouseup', () => {
+        mouseDown = false;
+      });
+
+      map.on('dblclick', (event) => {
+        //The double-click event handler now checks whether the mouseMoved variable is false before proceeding, which means the double-click event will only be triggered if the mouse wasn't moved between the first and second click.
+        if (!mouseMoved) {
+          // Get the clicked coordinates
+          const coordinates = [event.lngLat.lng, event.lngLat.lat];
+
+          // If the origin hasn't been set, set it
+          if (!originSet) {
+            plugin.setOrigin(coordinates);
+            originSet = true;
+          } else {
+            // If the origin is set, set the destination and reset the origin flag
+            plugin.setDestination(coordinates);
+            originSet = false;
+          }
+        }
+      });
 
     </script>
   </body>
