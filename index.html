@@ -25,25 +25,25 @@
       }
 
       h1 {
-        font-size: 20px;
+        font-size: 1.5vw; /*20px*/
       }
 
       h2 {
-        font-size: 16px;
+        font-size: 1.2vw; /*16px; 1vw: 14px*/ 
         line-height: 20px;
         margin-bottom: 10px;
       }
 
       a {
         text-decoration: none;
-        color: #86B5A3;
+        color: #018291/*#86B5A3;*/
       }
 
       .tab {
         overflow: hidden;
         background-color: #f1f1f1;
         display: flex;
-        border: 1px solid #86B5A3;
+        border: 1px solid #018291/*#86B5A3*/;
       }
 
       .tab button {
@@ -55,15 +55,15 @@
         cursor: pointer;
         padding: 10px;
         transition: background-color 0.3s ease;
-        font-size: 16px;
+        font-size: 1.1vw; 
       }
 
       .tab button:hover {
-        background-color: #5c9080;
+        background-color: #018291 /*#5c9080*/;
       }
 
       .tab button.active {
-        background-color: #B6C7B8;
+        background-color: #74B2B7/*#B6C7B8*/;
       }
 
       .tabcontent {
@@ -75,7 +75,7 @@
       #console {
         position: absolute;
         margin: 10px;
-        width: 260px;
+        width: 18%;
         background-color: white;
         padding: 10px;
         right: 0px;
@@ -122,7 +122,7 @@
       #loading-indicator {
         display: none; /* Hide the loading indicator by default */
         position: absolute;
-        font-size: 80px;
+        font-size: 6vw; /*80px*/
         top: 50%;
         left: 30%;
       }
@@ -151,14 +151,13 @@
   <body>
     <div id="map"></div>
     <div id="loading-indicator">Updating...</div>
-    <p style="font-style: italic; position: absolute; left: 100px; bottom: 25px; font-size: 12px">Map by Xiaofan Liang, Georgia Tech</p> 
     <div id="console">
       <h1>AeroATL Greenway Plan</h1>
       <p>
         Explore AeroATL Greenway Plan in maps and how your trips may be improved! 
         <a
           href="https://aeroatl.org/special-projects/aeroatl-greenway-model-mile/"
-          >Learn more about this project here.</a
+          >Learn more about the plan at Aerotropolis Atlanta.</a
         > 
       </p>
       <div class="tab">
@@ -168,37 +167,36 @@
       <div id="tab2" class="tabcontent">
         <div id = 'directions'>
           <p>
-            Double click on the map or type an address below to choose an origin and destination for a trip
+            Let's test trip scenarios on a portion of the Greenway Plan. This portion contains Model Miles, Priority Network, and existing bike paths.<br><br><b>Double click</b> on the map or type an address below to choose an origin and destination for a trip.
           </p>
-          <div id="route-legend">
+          <div id="route-legend" style="margin-bottom: 20px">
             <div>
               <span style="border-top: 5px solid #4882C5; width: 10%; display: inline-block;"></span>
-              <span style="font-size: 14px;">Trip with existing road networks</span>
+              <span style="font-size: 1vw;">Trip with existing road networks</span>
             </div>
             <div>
               <span style="border-top: 5px dashed #01314D; width: 10%; display: inline-block;"></span>
-              <span style="font-size: 14px">Trip with the Greenway</span>
+              <span style="font-size: 1vw">Trip with the Greenway</span> 
             </div>
           </div>
-          <p style="font-size: 14px">
-            Is the trip using the Greenway better? Can you think of a better route that makes use of the Greenway? 
-          </p>
         </div>
         <div id="route-summary">
-          <p style="font-weight: bold; margin-block: auto; font-size: 14px; margin-top: 10px">Trip Summary</p>
+          <p style="font-weight: bold; margin-block: auto; font-size: 1vw; margin-top: 10px">Trip Summary</p>
           <div>
             <span style="border-top: 5px solid #4882C5; width: 10%; display: inline-block;"></span>
-            <span style="font-size: 14px;"></span>
+            <span style="font-size: 1vw;"></span>
           </div>
           <div>
             <span style="border-top: 5px dashed #01314D; width: 10%; display: inline-block;"></span>
-            <span style="font-size: 14px"></span>
+            <span style="font-size: 1vw"></span>
           </div>
         </div>
+        <p style="font-weight: bold; margin-block: auto; font-size: 1vw; margin-top: 10px">Food for Thoughts</p>
+        <p style="font-size: 1vw; margin-top: 5px">Is the trip using the Greenway better? Can you think of a better route that makes use of the Greenway?</p>
       </div>
       <div id="tab1" class="tabcontent">
         <div class="session">
-          <h2>Show AeroATL Greenway Plan Layer(s)</h2> 
+          <h2>AeroATL Greenway Plan Layer(s)</h2> 
           <div id="selectLayer">
             <input type="checkbox" class="checkbox" checked='checked' value="All"> All
             <br>
@@ -216,19 +214,6 @@
             <br>
             <input type="checkbox" class="checkbox" value="Local Connections"> Local Connections
           </div>
-        <div id="legend", class="session">
-          <h2>Building Types by Color</h2>
-          <div><span style="background-color: #5B5558"></span>Airport</div>
-          <div><span style="background-color: #9B959D"></span>Infrastructure</div>
-          <div><span style="background-color: #890B24"></span>Residence</div>
-          <div><span style="background-color: #CB4700"></span>Commerce</div>
-          <div><span style="background-color: #FE9C2D"></span>Hotel</div>
-          <div><span style="background-color: #0E7C33"></span>Recreation</div>
-          <div><span style="background-color: #3C9493"></span>Industry</div>
-          <div><span style="background-color: #072C83"></span>Office</div>
-          <div><span style="background-color: #6DA8D6"></span>Institution</div>
-          <div><span style="background-color: #532788"></span>School</div>
-        </div>
         <div id="basemap-selector">
           <h2>Basemap Styles</h2>
           <label>
@@ -243,6 +228,24 @@
             <input type="radio" name="basemap" value="satellite-v9">
             Satellite
           </label>
+        </div>
+        <div id="legend", class="session">
+          <h2>Building Types by Color</h2>
+          <div><span style="background-color: #5B5558"></span>Airport</div>
+          <div><span style="background-color: #9B959D"></span>Infrastructure</div>
+          <div><span style="background-color: #890B24"></span>Residence</div>
+          <div><span style="background-color: #CB4700"></span>Commerce</div>
+          <div><span style="background-color: #FE9C2D"></span>Hotel</div>
+          <div><span style="background-color: #0E7C33"></span>Recreation</div>
+          <div><span style="background-color: #3C9493"></span>Industry</div>
+          <div><span style="background-color: #072C83"></span>Office</div>
+          <div><span style="background-color: #6DA8D6"></span>Institution</div>
+          <div><span style="background-color: #532788"></span>School</div>
+        </div>
+        <div class="session">
+          <p style="font-style: italic; font-size: 0.8vw">
+            Created by <a href="https://www.xiaofanliang.com/">Xiaofan Liang</a>, with support from the <a href="https://www.trb.org/ACRP/GraduateResearchAwards.aspx">ACRP Graduate Research Award</a>. Please refer to <a href="https://github.com/xiaofanliang/AeroATLGreenway">Github</a> for project details, reporting issues, and downloading data. 
+          </p>
         </div>
       </div>
     </div>
@@ -313,7 +316,7 @@
               paint: {
                 'line-width': 2,
                 'line-opacity': 0.8,
-                'line-color': '#519E9E'
+                'line-color': '#018291'
               }
             });
           }
@@ -329,7 +332,7 @@
               paint: {
                 'line-width': 2,
                 'line-opacity': 0.8,
-                'line-color': '#519E9E'
+                'line-color': '#018291' /*#519E9E*/
               }
             });
           }
@@ -408,7 +411,7 @@
               paint: {
                 'line-width': 2,
                 'line-opacity': 0.8,
-                'line-color': '#519E9E'
+                'line-color': '#018291'
                 }
               });
             }
@@ -616,6 +619,9 @@
         setTimeout(() => {
           if(Object.keys(plugin.getOrigin()).length == 0 | Object.keys(plugin.getDestination()).length == 0) {
             removeApiRoute()
+            //remove contents in route summary
+            document.querySelector('#route-summary > div:nth-child(2) > span:nth-child(2)').textContent = ""
+            document.querySelector('#route-summary > div:nth-child(3) > span:nth-child(2)').textContent = ""
           }
         }, 100);
       })
