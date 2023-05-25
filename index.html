@@ -36,8 +36,40 @@
 
       a {
         text-decoration: none;
-        color: #FFB24A 
-;
+        color: #86B5A3;
+      }
+
+      .tab {
+        overflow: hidden;
+        background-color: #f1f1f1;
+        display: flex;
+        border: 1px solid #86B5A3;
+      }
+
+      .tab button {
+        flex: 1;
+        background-color: white;
+        color: black;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 10px;
+        transition: background-color 0.3s ease;
+        font-size: 16px;
+      }
+
+      .tab button:hover {
+        background-color: #5c9080;
+      }
+
+      .tab button.active {
+        background-color: #B6C7B8;
+      }
+
+      .tabcontent {
+        display: none;
+        padding: 5px;
+        background-color: white;
       }
 
       #console {
@@ -87,7 +119,15 @@
         max-wdith: 250px;
       }
 
-      .mapbox-directions-instructions {
+      #loading-indicator {
+        display: none; /* Hide the loading indicator by default */
+        position: absolute;
+        font-size: 80px;
+        top: 50%;
+        left: 30%;
+      }
+
+/*      .mapbox-directions-instructions {
         display: none;
       }
 
@@ -103,62 +143,107 @@
       .mapbox-directions-component.mapbox-directions-route-summary h1, .mapbox-directions-component.mapbox-directions-route-summary span {
         color: rgba(0,0,0,.75);
         font-size: 13px;
-      }
+      }*/
 
     </style>
   </head>
 
   <body>
     <div id="map"></div>
+    <div id="loading-indicator">Updating...</div>
     <p style="font-style: italic; position: absolute; left: 100px; bottom: 25px; font-size: 12px">Map by Xiaofan Liang, Georgia Tech</p> 
     <div id="console">
       <h1>AeroATL Greenway Plan</h1>
       <p>
-        Explore how your trips may be improved with AeroATL Greenway Plan! 
+        Explore AeroATL Greenway Plan in maps and how your trips may be improved! 
         <a
           href="https://aeroatl.org/special-projects/aeroatl-greenway-model-mile/"
           >Learn more about this project here.</a
         > 
       </p>
-      <div id = 'directions'>
-        <p>
-          Double click on the map or type below to choose an origin and destination
-        </p>
-        <p style="font-size: 12px">
-          The visualized trip shows the suggested path by modes in the current road network (without the Greenway Plan). How much of this trip can be covered by the Greenway? Can you think of a better path that makes use of the Greenway? 
-        </p>
+      <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'tab1')">Maps</button>
+        <button class="tablinks" onclick="openTab(event, 'tab2')">Trip Scenarios</button>
       </div>
-      <div class="session">
-        <h2>Show AeroATL Greenway Plan Layer(s)</h2> 
-        <div id="selectLayer">
-          <input type="checkbox" class="checkbox" checked='checked' value="All"> All
-          <br>
-          <input type="checkbox" class="checkbox" value="Existing Bike Paths"> Existing Bike Paths
-          <br>
-          <input type="checkbox" class="checkbox" value="Model Miles"> Model Miles
-          <br>
-          <input type="checkbox" class="checkbox" value="Priority Network"> Priority Network
-          <br>
-          <input type="checkbox" class="checkbox" value="Loop Connecting Downtowns"> Loop Connecting Downtowns
-          <br>
-          <input type="checkbox" class="checkbox" value="Airport Loop"> Airport Loop
-          <br>
-          <input type="checkbox" class="checkbox" value="Outer Ring"> Outer Ring
-          <br>
-          <input type="checkbox" class="checkbox" value="Local Connections"> Local Connections
+      <div id="tab2" class="tabcontent">
+        <div id = 'directions'>
+          <p>
+            Double click on the map or type an address below to choose an origin and destination for a trip
+          </p>
+          <div id="route-legend">
+            <div>
+              <span style="border-top: 5px solid #4882C5; width: 10%; display: inline-block;"></span>
+              <span style="font-size: 14px;">Trip with existing road networks</span>
+            </div>
+            <div>
+              <span style="border-top: 5px dashed #01314D; width: 10%; display: inline-block;"></span>
+              <span style="font-size: 14px">Trip with the Greenway</span>
+            </div>
+          </div>
+          <p style="font-size: 14px">
+            Is the trip using the Greenway better? Can you think of a better route that makes use of the Greenway? 
+          </p>
         </div>
-      <div id="legend", class="session">
-        <h2>Building Types by Color</h2>
-        <div><span style="background-color: #5B5558"></span>Airport</div>
-        <div><span style="background-color: #9B959D"></span>Infrastructure</div>
-        <div><span style="background-color: #890B24"></span>Residence</div>
-        <div><span style="background-color: #CB4700"></span>Commerce</div>
-        <div><span style="background-color: #FE9C2D"></span>Hotel</div>
-        <div><span style="background-color: #0E7C33"></span>Recreation</div>
-        <div><span style="background-color: #3C9493"></span>Industry</div>
-        <div><span style="background-color: #072C83"></span>Office</div>
-        <div><span style="background-color: #6DA8D6"></span>Institution</div>
-        <div><span style="background-color: #532788"></span>School</div>
+        <div id="route-summary">
+          <p style="font-weight: bold; margin-block: auto; font-size: 14px; margin-top: 10px">Trip Summary</p>
+          <div>
+            <span style="border-top: 5px solid #4882C5; width: 10%; display: inline-block;"></span>
+            <span style="font-size: 14px;"></span>
+          </div>
+          <div>
+            <span style="border-top: 5px dashed #01314D; width: 10%; display: inline-block;"></span>
+            <span style="font-size: 14px"></span>
+          </div>
+        </div>
+      </div>
+      <div id="tab1" class="tabcontent">
+        <div class="session">
+          <h2>Show AeroATL Greenway Plan Layer(s)</h2> 
+          <div id="selectLayer">
+            <input type="checkbox" class="checkbox" checked='checked' value="All"> All
+            <br>
+            <input type="checkbox" class="checkbox" value="Existing Bike Paths"> Existing Bike Paths
+            <br>
+            <input type="checkbox" class="checkbox" value="Model Miles"> Model Miles
+            <br>
+            <input type="checkbox" class="checkbox" value="Priority Network"> Priority Network
+            <br>
+            <input type="checkbox" class="checkbox" value="Loop Connecting Downtowns"> Loop Connecting Downtowns
+            <br>
+            <input type="checkbox" class="checkbox" value="Airport Loop"> Airport Loop
+            <br>
+            <input type="checkbox" class="checkbox" value="Outer Ring"> Outer Ring
+            <br>
+            <input type="checkbox" class="checkbox" value="Local Connections"> Local Connections
+          </div>
+        <div id="legend", class="session">
+          <h2>Building Types by Color</h2>
+          <div><span style="background-color: #5B5558"></span>Airport</div>
+          <div><span style="background-color: #9B959D"></span>Infrastructure</div>
+          <div><span style="background-color: #890B24"></span>Residence</div>
+          <div><span style="background-color: #CB4700"></span>Commerce</div>
+          <div><span style="background-color: #FE9C2D"></span>Hotel</div>
+          <div><span style="background-color: #0E7C33"></span>Recreation</div>
+          <div><span style="background-color: #3C9493"></span>Industry</div>
+          <div><span style="background-color: #072C83"></span>Office</div>
+          <div><span style="background-color: #6DA8D6"></span>Institution</div>
+          <div><span style="background-color: #532788"></span>School</div>
+        </div>
+        <div id="basemap-selector">
+          <h2>Basemap Styles</h2>
+          <label>
+            <input type="radio" name="basemap" value="light-v10" checked>
+            Light
+          </label>
+          <label>
+            <input type="radio" name="basemap" value="streets-v11">
+            Streets
+          </label>
+          <label>
+            <input type="radio" name="basemap" value="satellite-v9">
+            Satellite
+          </label>
+        </div>
       </div>
     </div>
     <script>
@@ -175,6 +260,85 @@
           center: [-84.4, 33.64], // starting position [lng, lat]
           zoom: 11.5 // starting zoom
       });
+
+      // Get the basemap selector container
+      const basemapSelector = document.getElementById('basemap-selector');
+
+      // Add an event listener to the basemap selector
+      basemapSelector.addEventListener('change', (event) => {
+        // Retrieve the selected basemap value
+        const selectedBasemap = event.target.value;
+
+        // Update the Mapbox map style with the selected basemap
+        map.setStyle(`mapbox://styles/mapbox/${selectedBasemap}`);
+        map.on('style.load', () => {
+          loadLayers();
+        })
+      });
+
+      // set a global var to know which tab is active for controlling double click events
+      let activeTab;
+
+      // JavaScript function to switch between tabs
+      function openTab(event, tabName) {
+        // Hide all tab content
+        const tabContents = document.getElementsByClassName("tabcontent");
+        for (let i = 0; i < tabContents.length; i++) {
+          tabContents[i].style.display = "none";
+        }
+
+        // Remove active class from all tab buttons
+        const tabLinks = document.getElementsByClassName("tablinks");
+        for (let i = 0; i < tabLinks.length; i++) {
+          tabLinks[i].classList.remove("active");
+        }
+
+        // Show the selected tab content
+        document.getElementById(tabName).style.display = "block";
+
+        // Add active class to the clicked tab button
+        event.currentTarget.classList.add("active");
+        activeTab = tabName;
+
+        // swith which greenway data to show for tab 1 and 2
+        if(tabName == 'tab2'){
+          if(map.getLayer('greenway-layer')) {
+            map.removeLayer('greenway-layer')
+          }
+          if(!map.getLayer('PP_MM-layer')){
+            map.addLayer({
+              id: 'PP_MM-layer',
+              type: 'line',
+              source: 'PP_MM',
+              paint: {
+                'line-width': 2,
+                'line-opacity': 0.8,
+                'line-color': '#519E9E'
+              }
+            });
+          }
+        } else {
+          if(map.getLayer('PP_MM-layer')){
+            map.removeLayer('PP_MM-layer')
+          }
+          if (!map.getLayer('greenway-layer')) {
+          map.addLayer({
+              id: 'greenway-layer',
+              type: 'line',
+              source: 'greenway',
+              paint: {
+                'line-width': 2,
+                'line-opacity': 0.8,
+                'line-color': '#519E9E'
+              }
+            });
+          }
+        }
+      }
+
+      // Open the first tab by default
+      document.getElementById("tab1").style.display = "block";
+      document.getElementsByClassName("tablinks")[0].classList.add("active");
 
       // Create a popup, but don't add it to the map yet.
       const popup = new mapboxgl.Popup({
@@ -193,24 +357,20 @@
         return checkedValues;
       }
 
-      map.on('load', () => {
-
+      function loadLayers(){
         Promise.all([
           fetch('data/Building_mapbox.geojson').then(response => response.json()),
-          fetch('data/Greenway_mapbox.geojson').then(response => response.json())
+          fetch('data/Greenway_mapbox.geojson').then(response => response.json()),
+          fetch('data/Roads_PP_MM_mapbox.geojson').then(response => response.json())
         ])
-        .then(([buildingData, greenwayData]) => {
-            map.addSource('building', {
-              type: 'geojson',
-              data: buildingData
-            });
+        .then(([buildingData, greenwayData, PP_MM]) => {
+            if (!map.getSource('building')) {
+              map.addSource('building', {
+                type: 'geojson',
+                data: buildingData
+              });
 
-            map.addSource('greenway', {
-              type: 'geojson',
-              data: greenwayData
-            });
-
-            map.addLayer({
+              map.addLayer({
               id: 'building-layer',
               type: 'fill',
               source: 'building',
@@ -231,77 +391,96 @@
                   'Industry', '#3C9493',
                   '#F9F8F8'
                   ]
-              }
-            });
+                }
+              });
+            }
+            
+            if (!map.getSource('greenway')) {
+              map.addSource('greenway', {
+                type: 'geojson',
+                data: greenwayData
+              });
 
-            map.addLayer({
+              map.addLayer({
               id: 'greenway-layer',
               type: 'line',
               source: 'greenway',
               paint: {
                 'line-width': 2,
                 'line-opacity': 0.8,
-                'line-color': '#000101'
-              }
-            });
-
-            map.on('mouseenter', 'building-layer', (e) => { //mousemove
-            // Change the cursor style as a UI indicator.
-            map.getCanvas().style.cursor = 'pointer'; 
-            // Populate the popup and set its coordinates based on the feature.
-            const feature = e.features[0];
-            popup
-              //.setLngLat(e.lngLat) //for click
-              .setLngLat(e.lngLat)
-              .setHTML(
-              `<p style='margin:0'><b>Zoning Code:</b> ${feature.properties.Zn_ClsC}</p>
-               <p style='margin:0'><b>Land Use Code:</b> ${feature.properties.LUCode}</p>
-               <p style='margin:0'><b>Land Use Type:</b> ${feature.properties.LUDes}</p>
-               <p style='margin:0'><b>Land Use Vis:</b> ${feature.properties.LU4Vis}</p>
-               <p style='margin:0'><b>Estimated Jobs:</b> ${feature.properties.BldgJobs}</p>
-               <p style='margin:0'><b>Est. Jobs $3333+:</b> ${feature.properties.Jobs3333}</p>`
-              )
-              .addTo(map);
-            });
-               
-            map.on('mouseleave', 'building-layer', () => {
-              map.getCanvas().style.cursor = '';
-              popup.remove();
-            });
-
-            const checkboxes = document.querySelectorAll('#selectLayer input[type="checkbox"]');
-
-            checkboxes.forEach((checkbox) => {
-              checkbox.addEventListener('change', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                const GreenwayLayer = event.target.value;
-                const checked = getCheckedValues('checkbox');
-                //console.log(checked)
-                // update the map filter
-                if(checked.includes('All')) {
-                  map.setFilter('greenway-layer', ['!=', 'AeroATL', ''])
-                  map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
-                } else if (checked.length == 0){
-                  //console.log('Empty')
-                  map.setLayoutProperty('greenway-layer', 'visibility', 'none')
-                } else {
-                  //console.log('Multiple')
-                  map.setFilter('greenway-layer', ['match', ['get', 'AeroATL'], checked, true, false])
-                  map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
+                'line-color': '#519E9E'
                 }
-              }); 
-            });
-          });
+              });
+            }
+            
+            if (!map.getSource('PP_MM')) {
+              map.addSource('PP_MM', {
+                type: 'geojson',
+                data: PP_MM
+              });
+            }
+          })
+      }
+
+      map.on('load', () => {
+        loadLayers()
+      })
+      
+      map.on('mouseenter', 'building-layer', (e) => { //mousemove
+      // Change the cursor style as a UI indicator.
+      map.getCanvas().style.cursor = 'pointer'; 
+      // Populate the popup and set its coordinates based on the feature.
+      const feature = e.features[0];
+      popup
+        //.setLngLat(e.lngLat) //for click
+        .setLngLat(e.lngLat)
+        .setHTML(
+        `<p style='margin:0'><b>Building ID:</b> ${feature.properties.BuildingId}</p>
+         <p style='margin:0'><b>Zoning Code:</b> ${feature.properties.Zn_ClsC}</p>
+         <p style='margin:0'><b>Land Use Code:</b> ${feature.properties.LUCode}</p>
+         <p style='margin:0'><b>Land Use Type:</b> ${feature.properties.LUDes}</p>
+         <p style='margin:0'><b>Land Use Vis:</b> ${feature.properties.LU4Vis}</p>`
+        )
+        .addTo(map);
+      });
+         
+      map.on('mouseleave', 'building-layer', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+
+      const checkboxes = document.querySelectorAll('#selectLayer input[type="checkbox"]');
+
+      checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const GreenwayLayer = event.target.value;
+          const checked = getCheckedValues('checkbox');
+          //console.log(checked)
+          // update the map filter
+          if(checked.includes('All')) {
+            map.setFilter('greenway-layer', ['!=', 'AeroATL', ''])
+            map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
+          } else if (checked.length == 0){
+            //console.log('Empty')
+            map.setLayoutProperty('greenway-layer', 'visibility', 'none')
+          } else {
+            //console.log('Multiple')
+            map.setFilter('greenway-layer', ['match', ['get', 'AeroATL'], checked, true, false])
+            map.setLayoutProperty('greenway-layer', 'visibility', 'visible')
+          }
+        }); 
       });
       
       //https://github.com/mapbox/mapbox-gl-directions/blob/master/API.md#mapboxdirections
       const plugin = new MapboxDirections({
           accessToken: mapboxgl.accessToken,
           profile: "mapbox/walking",
-          interactive: false,
+          interactive: false, //redefined to be double click manually
+          // hiding instruction-route-summary
           controls: {
-            instructions: true
+            instructions: false
           }
       }); 
       //map.addControl(plugin,'top-left');
@@ -329,9 +508,76 @@
         mouseDown = false;
       });
 
+      function callAPI(startCoordinates, endCoordinates, routeProfile) {
+        // Show the loading indicator
+        const loadingIndicator = document.getElementById('loading-indicator');
+        loadingIndicator.style.display = 'block';
+
+        // Create the URL for your API
+        let url;
+        if(routeProfile == 'mapbox/biking') {
+          url = `https://my-plumber-app-vpmjd5znma-uc.a.run.app/AeroGreenwayRoute?coords=${startCoordinates[0]},${startCoordinates[1]},${endCoordinates[0]},${endCoordinates[1]}&profile=biking`;
+        } else {
+          url = `https://my-plumber-app-vpmjd5znma-uc.a.run.app/AeroGreenwayRoute?coords=${startCoordinates[0]},${startCoordinates[1]},${endCoordinates[0]},${endCoordinates[1]}&profile=walking`;
+        }
+
+        // Fetch the response from your API
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            const route = JSON.parse(data.geojson[0])
+            // Add or replace the first/last coordinates with the start and end coordinates in the route
+            //route.coordinates.unshift(startCoordinates);
+            // route.coordinates.push(endCoordinates);
+            route.coordinates[0] = startCoordinates;
+            route.coordinates[route.coordinates.length - 1] = endCoordinates;
+            drawRoute(route)
+            greenwayDistance = data.dist_miles[0]
+            greenwayPct = data.pct[0] //object
+            // Update the values in the HTML
+            const distanceSpan = document.querySelector('#route-summary > div:nth-child(3) > span:nth-child(2)');
+            distanceSpan.textContent = `${greenwayDistance} miles (${Math.round(data.pct[1] + data.pct[0])}% on bike paths or Greenway)`;
+
+            //hide loading texts
+            loadingIndicator.style.display = 'none';
+          })
+      }
+
+      function removeApiRoute() {
+        if (map.getLayer('api-route')) {
+          map.removeLayer('api-route');
+          map.removeSource('api-route');
+        }
+      }
+      function drawRoute(data) {
+        // Remove the previous route layer if it exists
+        removeApiRoute();
+        map.addSource('api-route', {
+          'type': 'geojson',
+          'data': data
+        });
+        map.addLayer({
+          'id': 'api-route',
+          'type': 'line',
+          'source': 'api-route',
+          'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          'paint': {
+            'line-color': '#01314D',
+            'line-width': 6,
+            'line-dasharray': [4,1.5]
+          }
+        });
+      };
+
+      let startCoordinates = null;
+      let endCoordinates = null;
+
       map.on('dblclick', (event) => {
         //The double-click event handler now checks whether the mouseMoved variable is false before proceeding, which means the double-click event will only be triggered if the mouse wasn't moved between the first and second click.
-        if (!mouseMoved) {
+        if (activeTab == 'tab2' && !mouseMoved) {
           // Get the clicked coordinates
           const coordinates = [event.lngLat.lng, event.lngLat.lat];
 
@@ -339,10 +585,65 @@
           if (!originSet) {
             plugin.setOrigin(coordinates);
             originSet = true;
+            startCoordinates = plugin.getOrigin().geometry.coordinates
           } else {
             // If the origin is set, set the destination and reset the origin flag
             plugin.setDestination(coordinates);
             originSet = false;
+            endCoordinates = coordinates
+            // Call your API after setting the destination            
+            // Mapbox Direction API will adjust the cursor coordinates to be on the road networks. wait 500 milliseconds for plugin to catch up on updated origin/destination.
+            setTimeout(() => {
+              startCoordinates = plugin.getOrigin().geometry.coordinates
+              endCoordinates = plugin.getDestination().geometry.coordinates
+             callAPI(startCoordinates, endCoordinates, routeProfile);
+            }, 500);
+          }
+        }
+      });
+
+      function fetchDirectionsRoute(startCoordinates, endCoordinates) {
+        return new Promise((resolve, reject) => {
+          plugin.on('route', (event) => {
+            resolve(event.route);
+          });
+        });
+      }
+
+      //remove api route when origin becomes empty; setTimeout is necessary to make sure plugin.getOrigin() will wait for plugin to respond
+      const geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder input');
+      geocoderInput.addEventListener('change', () => {
+        setTimeout(() => {
+          if(Object.keys(plugin.getOrigin()).length == 0 | Object.keys(plugin.getDestination()).length == 0) {
+            removeApiRoute()
+          }
+        }, 100);
+      })
+
+      // Add event listener for route event
+      plugin.on('route', (event) => {
+        // Retrieve the route information
+        const route = event.route[0];
+        // Access the duration and distance from the route
+        const duration = route.duration; // in seconds
+        const distance = route.distance; // in meters
+
+        // Convert the duration and distance to two digits
+        const durationInMinutes = Math.round(duration / 60);
+        const distanceInMiles = (distance * 0.000621371).toFixed(2);
+
+        // Update the values in the HTML
+        const distanceSpan = document.querySelector('#route-summary > div:nth-child(2) > span:nth-child(2)');
+        distanceSpan.textContent = `${distanceInMiles} miles (${durationInMinutes} mins)`;
+      });
+
+      let routeProfile = null; // Store the route profile
+      plugin.on('profile', (event) => {
+        routeProfile = event.profile
+        // only callAPI again if the coordinates are the same but profile has changed
+        if(startCoordinates && endCoordinates) {
+          if(plugin.getOrigin().geometry.coordinates == startCoordinates && plugin.getDestination().geometry.coordinates == endCoordinates) {
+            callAPI(startCoordinates, endCoordinates, routeProfile)
           }
         }
       });
