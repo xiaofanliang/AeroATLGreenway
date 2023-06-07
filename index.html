@@ -605,11 +605,11 @@
             endCoordinates = coordinates
             // Call your API after setting the destination            
             // Mapbox Direction API will adjust the cursor coordinates to be on the road networks. wait 500 milliseconds for plugin to catch up on updated origin/destination.
-            setTimeout(() => {
-              startCoordinates = plugin.getOrigin().geometry.coordinates
-              endCoordinates = plugin.getDestination().geometry.coordinates
-             callAPI(startCoordinates, endCoordinates, routeProfile);
-            }, 500);
+            // setTimeout(() => {
+            //   startCoordinates = plugin.getOrigin().geometry.coordinates
+            //   endCoordinates = plugin.getDestination().geometry.coordinates
+            //  callAPI(startCoordinates, endCoordinates, routeProfile);
+            // }, 500);
           }
         }
       });
@@ -622,7 +622,7 @@
         });
       }
 
-      //remove api route when origin becomes empty; setTimeout is necessary to make sure plugin.getOrigin() will wait for plugin to respond
+      //remove api route when origin becomes empty (for some reason, cannot do the same when destination is empty); setTimeout is necessary to make sure plugin.getOrigin() will wait for plugin to respond
       const geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder input');
       geocoderInput.addEventListener('change', () => {
         setTimeout(() => {
@@ -635,8 +635,34 @@
         }, 100);
       })
 
+      // check if origin has changed (either from address or dbclick); removed is not accounted for, thus listener on geocoderInput still required.
+      // plugin.on('destination', (event) => {
+      //   console.log('destination changed')
+      //   setTimeout(() => {
+      //     if(Object.keys(plugin.getOrigin()).length != 0 | Object.keys(plugin.getDestination()).length != 0) {
+      //       console.log('callAPI fired in destination listener')
+      //       // Retrieve coordinates from plugin
+      //       startCoordinates = plugin.getOrigin().geometry.coordinates
+      //       endCoordinates = plugin.getDestination().geometry.coordinates
+      //       // Call the API
+      //       callAPI(startCoordinates, endCoordinates, routeProfile);
+      //     }
+      //   }, 100);
+      // })
+
+      let debounceTimeout = null;
+      const debounceTime = 500; // ms
+
+      function debounce(func) {
+        if (debounceTimeout) {
+          clearTimeout(debounceTimeout);
+        }
+        debounceTimeout = setTimeout(func, debounceTime);
+      }
+
       // Add event listener for route event
       plugin.on('route', (event) => {
+        console.log('route has changed')
         // Retrieve the route information
         const route = event.route[0];
         // Access the duration and distance from the route
@@ -650,17 +676,23 @@
         // Update the values in the HTML
         const distanceSpan = document.querySelector('#route-summary > div:nth-child(3) > span:nth-child(2)');
         distanceSpan.textContent = `${distanceInMiles} miles (${durationInMinutes} mins)`;
+
+        //debounce help make sure that callAPI() only fired once in route or profile listener in 500ms. 
+        debounce(() => {
+          callAPI(plugin.getOrigin().geometry.coordinates, plugin.getDestination().geometry.coordinates, routeProfile);
+        });
       });
 
       let routeProfile = null; // Store the route profile
       plugin.on('profile', (event) => {
         routeProfile = event.profile
-        // only callAPI again if the coordinates are the same but profile has changed
-        if(startCoordinates && endCoordinates) {
-          if(plugin.getOrigin().geometry.coordinates == startCoordinates && plugin.getDestination().geometry.coordinates == endCoordinates) {
-            callAPI(startCoordinates, endCoordinates, routeProfile)
-          }
-        }
+        debounce(() => {
+          // only callAPI again if the coordinates are the same but profile has changed
+          if(startCoordinates && endCoordinates) {
+            if(plugin.getOrigin().geometry.coordinates == startCoordinates && plugin.getDestination().geometry.coordinates == endCoordinates) {
+              callAPI(startCoordinates, endCoordinates, routeProfile)}
+            }
+        });
       });
 
     </script>
