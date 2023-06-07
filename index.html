@@ -677,8 +677,6 @@
         debounce(() => {
           // only callAPI again if the coordinates are the same but profile has changed
           if(startCoordinates && endCoordinates) {
-            console.log('startCoordinates', startCoordinates)
-            console.log('endCoordinates', endCoordinates)
             if(plugin.getOrigin().geometry.coordinates == startCoordinates && plugin.getDestination().geometry.coordinates == endCoordinates) {
               callAPI(startCoordinates, endCoordinates, routeProfile)}
             }
