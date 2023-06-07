@@ -631,24 +631,13 @@
             //remove contents in route summary
             document.querySelector('#route-summary > div:nth-child(3) > span:nth-child(2)').textContent = ""
             document.querySelector('#route-summary > div:nth-child(5) > span:nth-child(2)').textContent = ""
+
+            //set them back to null so a profile change on empty OD will not trigger errors
+            startCoordinates = null;
+            endCoordinates = null;
           }
         }, 100);
       })
-
-      // check if origin has changed (either from address or dbclick); removed is not accounted for, thus listener on geocoderInput still required.
-      // plugin.on('destination', (event) => {
-      //   console.log('destination changed')
-      //   setTimeout(() => {
-      //     if(Object.keys(plugin.getOrigin()).length != 0 | Object.keys(plugin.getDestination()).length != 0) {
-      //       console.log('callAPI fired in destination listener')
-      //       // Retrieve coordinates from plugin
-      //       startCoordinates = plugin.getOrigin().geometry.coordinates
-      //       endCoordinates = plugin.getDestination().geometry.coordinates
-      //       // Call the API
-      //       callAPI(startCoordinates, endCoordinates, routeProfile);
-      //     }
-      //   }, 100);
-      // })
 
       let debounceTimeout = null;
       const debounceTime = 500; // ms
@@ -662,7 +651,6 @@
 
       // Add event listener for route event
       plugin.on('route', (event) => {
-        console.log('route has changed')
         // Retrieve the route information
         const route = event.route[0];
         // Access the duration and distance from the route
@@ -689,6 +677,8 @@
         debounce(() => {
           // only callAPI again if the coordinates are the same but profile has changed
           if(startCoordinates && endCoordinates) {
+            console.log('startCoordinates', startCoordinates)
+            console.log('endCoordinates', endCoordinates)
             if(plugin.getOrigin().geometry.coordinates == startCoordinates && plugin.getDestination().geometry.coordinates == endCoordinates) {
               callAPI(startCoordinates, endCoordinates, routeProfile)}
             }
