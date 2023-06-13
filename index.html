@@ -135,24 +135,6 @@
         left: 30%;
       }
 
-/*      .mapbox-directions-instructions {
-        display: none;
-      }
-
-      .mapbox-directions-component.mapbox-directions-route-summary {
-        background-color: white;
-        margin: 0px;
-        padding-top: 0px;
-        padding-bottom: 0px;
-        padding-right: 0px;
-        line-height: 12px;
-      }
-
-      .mapbox-directions-component.mapbox-directions-route-summary h1, .mapbox-directions-component.mapbox-directions-route-summary span {
-        color: rgba(0,0,0,.75);
-        font-size: 13px;
-      }*/
-
     </style>
   </head>
 
@@ -223,18 +205,12 @@
           </div>
         <div id="basemap-selector" style="font-size: 1vw">
           <h2>Basemap Styles</h2>
-          <label>
-            <input type="radio" name="basemap" value="light-v10" checked>
-            Light
-          </label>
-          <label>
-            <input type="radio" name="basemap" value="streets-v11">
-            Streets
-          </label>
-          <label>
-            <input type="radio" name="basemap" value="satellite-v9">
-            Satellite
-          </label>
+          <input id="light-v11" type="radio" name="rtoggle" value="light" checked="checked">
+          <label for="light-v11">Light</label>
+          <input id="streets-v11" type="radio" name="rtoggle" value="streets">
+          <label for="streets-v11">Streets</label>
+          <input id="satellite-v9" type="radio" name="rtoggle" value="satellite">
+          <label for="satellite-v9">Satellite</label>
         </div>
         <div id="legend", class="session" style="font-size: 1vw">
           <h2>Building Types by Color</h2>
@@ -275,18 +251,29 @@
 
       // Get the basemap selector container
       const basemapSelector = document.getElementById('basemap-selector');
+      const inputs = basemapSelector.getElementsByTagName('input');
 
-      // Add an event listener to the basemap selector
-      basemapSelector.addEventListener('change', (event) => {
-        // Retrieve the selected basemap value
-        const selectedBasemap = event.target.value;
+      let plugin;
+      //https://github.com/mapbox/mapbox-gl-directions/blob/master/API.md#mapboxdirections
+      plugin = new MapboxDirections({
+          accessToken: mapboxgl.accessToken,
+          profile: "mapbox/walking",
+          interactive: false, //redefined to be double click manually
+          // hiding instruction-route-summary
+          controls: {
+            instructions: false
+          }
+      }); 
+      //add direction plug in to an existing div 
+      document.getElementById('directions').appendChild(plugin.onAdd(map))
 
-        // Update the Mapbox map style with the selected basemap
-        map.setStyle(`mapbox://styles/mapbox/${selectedBasemap}`);
-        map.on('style.load', () => {
-          loadLayers();
-        })
-      });
+      for (const input of inputs) {
+        input.onclick = (layer) => {
+          const layerId = layer.target.id;
+          map.setStyle('mapbox://styles/mapbox/' + layerId);
+          map.once('styledata', loadLayers);
+        };
+      }
 
       // set a global var to know which tab is active for controlling double click events
       let activeTab;
@@ -484,21 +471,6 @@
           }
         }); 
       });
-      
-      //https://github.com/mapbox/mapbox-gl-directions/blob/master/API.md#mapboxdirections
-      const plugin = new MapboxDirections({
-          accessToken: mapboxgl.accessToken,
-          profile: "mapbox/walking",
-          interactive: false, //redefined to be double click manually
-          // hiding instruction-route-summary
-          controls: {
-            instructions: false
-          }
-      }); 
-      //map.addControl(plugin,'top-left');
-
-      //add direction plug in to an existing div 
-      document.getElementById('directions').appendChild(plugin.onAdd(map))
 
       let originSet = false;
       let mouseDown = false;
@@ -603,25 +575,10 @@
             plugin.setDestination(coordinates);
             originSet = false;
             endCoordinates = coordinates
-            // Call your API after setting the destination            
-            // Mapbox Direction API will adjust the cursor coordinates to be on the road networks. wait 500 milliseconds for plugin to catch up on updated origin/destination.
-            // setTimeout(() => {
-            //   startCoordinates = plugin.getOrigin().geometry.coordinates
-            //   endCoordinates = plugin.getDestination().geometry.coordinates
-            //  callAPI(startCoordinates, endCoordinates, routeProfile);
-            // }, 500);
           }
         }
       });
-
-      function fetchDirectionsRoute(startCoordinates, endCoordinates) {
-        return new Promise((resolve, reject) => {
-          plugin.on('route', (event) => {
-            resolve(event.route);
-          });
-        });
-      }
-
+      
       //remove api route when origin becomes empty (for some reason, cannot do the same when destination is empty); setTimeout is necessary to make sure plugin.getOrigin() will wait for plugin to respond
       const geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder input');
       geocoderInput.addEventListener('change', () => {
