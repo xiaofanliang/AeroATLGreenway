@@ -32,6 +32,7 @@ This project is part of Xiaofan Liang's City and Regional Planning PhD Dissertat
 #### Download Data in the Web Tool
 * Buildings: [data/Building_mapbox.geojson](https://github.com/xiaofanliang/AeroATLGreenway/tree/main/data)
 * AeroATL Greenway (same as source): [data/Greenway_mapbox.geojson](https://github.com/xiaofanliang/AeroATLGreenway/tree/main/data)
+* Linked Roads: [data/Roads_mapbox.geojson](https://github.com/xiaofanliang/AeroATLGreenway/tree/main/data)
 * A manually integrated network with existing bike lanes, Model Miles, and Priority Networks for routing use: [data/Roads_PP_MM_mapbox.geojson](https://github.com/xiaofanliang/AeroATLGreenway/tree/main/data)
 
 ### Tech Deck for Web Tool Implementation
