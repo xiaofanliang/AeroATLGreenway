@@ -35,6 +35,13 @@ This project is part of Xiaofan Liang's City and Regional Planning PhD Dissertat
 * A manually integrated network with existing bike lanes, Model Miles, and Priority Networks for routing use: [data/Roads_PP_MM_mapbox.geojson](https://github.com/xiaofanliang/AeroATLGreenway/tree/main/data)
 
 ### Tech Deck for Web Tool Implementation
+* **Mapbox JS**: the main scripting language for web interaction 
+* **R**: the main scripting language for routing computation on the Greenway scenarios
+* **R `plumber` package**: create a customized API for R codes 
+* **R `dodgr` package**: compute route distance and distance breakdown by road types. Seamless integration with OSM data.  
+* **Docker**: environment container to preload data and packages for the next step web hosting. 
+* **Google Cloud Run**: host for the R API created through `plumber`. It outputs a URL that our web tool can query and receive outputs in time. 
+
 I implement the web tool through Mapbox JS. However, Mapbox JS does not support routing computation on user-customized networks (i.e., the Greenway Plan). Thus, I create a web API (with R `plumber` package) for the same R codes I use in R to calculate trip distance and road type breakdown (through R `dodgr` package), containerize the API through Docker, and host the API on Google Cloud Run (free to host for a small traffic). As such, when users select an origin and destination on the web tool, a request is sent to both the Mapbox JS Direction Plugin and our custom API to retrieve routing geometry and statistics with the existing road networks and the Greenway (i.e., PN scenario), respectively.  
 
 ### Potential Problems with the Web Tool
