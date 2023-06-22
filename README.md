@@ -45,15 +45,21 @@ This project is part of Xiaofan Liang's City and Regional Planning PhD Dissertat
 
 I implement the web tool through Mapbox JS. However, Mapbox JS does not support routing computation on user-customized networks (i.e., the Greenway Plan). Thus, I create a web API (with R `plumber` package) for the same R codes I use in R to calculate trip distance and road type breakdown (through R `dodgr` package), containerize the API through Docker, and host the API on Google Cloud Run (free to host for a small traffic). As such, when users select an origin and destination on the web tool, a request is sent to both the Mapbox JS Direction Plugin and our custom API to retrieve routing geometry and statistics with the existing road networks and the Greenway (i.e., PN scenario), respectively.  
 
-### Potential Problems with the Web Tool
+### Potential Q & A with the Web Tool
 
 **Please do not query the web tool or use it in a large event (over 100 people)**. Using the web tool for community engagement workshop, Greenway Plan design, or individual exploration are perfectly fine. The web tool relies on a customized API Xiaofan designed and hosted on Google Cloud Run and it will cost her $$$ if there is a large amount of traffic. 
 
-**If the trip summary and geometry in "Trip Scenarios" takes more than 1min (map loading "Updating..." text), refresh the page.** Sometimes there may be a jam to the API call. It may also help to wait a bit and choose a shorter trip. 
+**After selecting the OD, it has been loading for a while without returning the results.** Refresh the page. Sometimes there may be a jam to the API call. It may also help to wait a bit after the refreshing and choose a shorter trip. 
 
-**If double click does not show selected origin and destinations, or only one route geometry shows up for the selected OD, refresh the page.** 
+**After selecting the OD, only one route geometry is returned. I am expecting two routes with and without the Greenway** Refresh the page and do not toggle the basemap style in the *Map* tab. In another word, if you have toggled the basemap styles in the Maps tab, refresh the page before you go to *Trip Scenario* tab. Toggling the basemap can break the trip scenario function, which is an implementation bug that I could not solve for now. 
 
-**If you have toggled the basemap styles in the Maps tab, refresh the page before you go to Trip Scenario tab.** Otherwise, you may see the weird effect above. This is an implementation bug that I could not solve for now. 
+**How is a route determined given the origin and destination?** There isn't a formula for calculating the route. The routing for the existing road network uses the MapboxJS Direction Plugin to calculate distance and travel time and suggest the route geometry, while the routing for the Greenway uses a customized API with customized road network that has integrated the Greenway. The latter is computed in R through the R `dodgor` package. I do not know how routing algorithm in MapboxJS Direction Plugin works, but the outputs are pretty similar to what I tested in Google Maps. The routing algorithm in the customized API comes from R `dodgor` package. I customize the default routing profiles and assign the newly added ARC bike lanes and the Greenway with the highest weights so that they will be favored in the routing algorithm. In general, when determining a route, the routing algorithms (in either the Plugin or API) will look for a balance between a shortest path in distance and favorable road types. 
+
+**Why do suggested routes (and route statistics) different even though the OD did not use the Greenway?** The calculation with and without the Greenway is done through two sets of routing algorithms (Mapbox JS Direction Plugin and a customized API), so it is normal that they may have slight difference in output. 
+
+**Why do suggested biking routes so different (often much longer) from the walking routes?** The routing algorithms favor biking routes through roads with less traffic but does not do the same for pedestrians. In short, your walking routes are more likely to traverse primary roads than your biking routes, which makes the biking routes longer.  
+
+**the Greenway is bike/pedestrian only. How does it work when I choose Traffic or Driving mode in the control box?** When you choose Traffic or Driving mode in the control box, the route geometry and statistics with the existing road networks are updated to these modes, but the route geometry and statistics with the Greenway are assumed to be in walking mode.
 
 ### Reporting Issues or Requesting Updates on the AeroATL Greenway Web Tool
 Xiaofan is happy to maintain the web tool with some minimal efforts. To keep track of requests, please [open an issue](https://github.com/xiaofanliang/AeroATLGreenway/issues) on the same Github. If this sounds too technical, please email her at xiaofan.l@gatech.edu with the information requested below. She currently accept the following update requests: 
