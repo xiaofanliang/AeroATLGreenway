@@ -61,7 +61,7 @@ Refresh the page and do not toggle the basemap style in the *Map* tab. In anothe
 
 **How is a route determined given the origin and destination?** 
 
-There isn't a formula for calculating the route. The routing for the existing road network uses the MapboxJS Direction Plugin to calculate distance and travel time and suggest the route geometry, while the routing for the Greenway uses a customized API with customized road network that has integrated the Greenway. The latter is computed in R through the R `dodgor` package. I do not know how routing algorithm in MapboxJS Direction Plugin works, but the outputs are pretty similar to what I tested in Google Maps. The routing algorithm in the customized API comes from R `dodgor` package. I customize the default routing profiles and assign the newly added ARC bike lanes and the Greenway with the highest weights so that they will be favored in the routing algorithm. In general, when determining a route, the routing algorithms (in either the Plugin or API) will look for a balance between a shortest path in distance and favorable road types. 
+There isn't a formula for calculating the route. The routing for the existing road network uses the MapboxJS Direction Plugin to calculate distance and travel time and suggest the route geometry, while the routing for the Greenway uses a customized API with customized road network that has integrated the Greenway. The latter is computed in R through the R `dodgor` package. There are two sets of routing algorithms because Mapbox JS does not support routing computation on user-customized networks (i.e., the Greenway Plan). I do not know how routing algorithm in MapboxJS Direction Plugin works, but the outputs are pretty similar to what I tested in Google Maps. The routing algorithm in the customized API comes from R `dodgor` package. I customize the default routing profiles and assign the newly added ARC bike lanes and the Greenway with the highest weights so that they will be favored in the routing algorithm. In general, when determining a route, the routing algorithms (in either the Plugin or API) will look for a balance between a shortest path in distance and favorable road types. 
 
 **Why do suggested routes (and route statistics) different even though the OD did not use the Greenway?** 
 
@@ -69,7 +69,7 @@ The calculation with and without the Greenway is done through two sets of routin
 
 **Why do suggested biking routes so different (often much longer) from the walking routes?** 
 
-The routing algorithms favor biking routes through roads with less traffic but does not do the same for pedestrians. In short, your walking routes are more likely to traverse primary roads than your biking routes, which makes the biking routes longer.  
+The routing algorithms favor biking routes through roads with less traffic but do not do the same for pedestrians. In short, your walking routes are more likely to traverse primary roads than your biking routes, which makes the biking routes longer.  
 
 **the Greenway is bike/pedestrian only. How does it work when I choose Traffic or Driving mode in the control box?** 
 
